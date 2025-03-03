@@ -19,7 +19,7 @@ function Home() {
     slidesToShow: 1, // Hiển thị 1 ảnh mỗi lần
     slidesToScroll: 1, // Cuộn từng ảnh một
     autoplay: true, // Tự động chạy
-    autoplaySpeed: 2000, // Chuyển ảnh sau 3 giây
+    autoplaySpeed: 3000, // Chuyển ảnh sau 3 giây
     arrows: false, // Hiển thị nút điều hướng
   };
   return (

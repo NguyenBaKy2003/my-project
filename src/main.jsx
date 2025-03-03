@@ -19,6 +19,7 @@ import ThietBiNongNghiep from "./pages/ThietBiNongNghiep.jsx";
 import NewsPage from "./pages/NewPage.jsx";
 import OrderSuccess from "./pages/OrderSuccess.jsx";
 import NewsDetail from "./pages/NewsDetail.jsx";
+import AboutUs from "./pages/AboutUs.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -38,6 +39,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route
             path="category/thiet-bi-nong-nghiep"
             element={<ThietBiNongNghiep></ThietBiNongNghiep>}></Route>
+          <Route path="aboutus" element={<AboutUs></AboutUs>}></Route>
+
           <Route path="order-success" element={<OrderSuccess />} />
         </Route>
       </Routes>
