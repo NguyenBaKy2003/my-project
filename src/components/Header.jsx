@@ -50,7 +50,7 @@ function Header() {
             <img
               src="https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/09/LIVAK-CONTRUCTION-2-e1722735184415-1.png"
               alt="Logo"
-              className="h-20"
+              className="h-14 md:h-20"
             />
           </Link>
         </div>

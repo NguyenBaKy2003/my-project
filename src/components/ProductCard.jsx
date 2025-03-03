@@ -71,9 +71,9 @@ function ProductCard() {
       : products.filter((product) => product.category === selectedCategory);
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto  py-10">
       {/* Tabs - Điều chỉnh cuộn ngang trên mobile */}
-      <div className="flex justify-center space-x-2 overflow-x-auto whitespace-nowrap pb-2">
+      <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-hidden">
         {categories.map((category) => (
           <button
             key={category}
@@ -89,7 +89,7 @@ function ProductCard() {
       </div>
 
       {/* Grid sản phẩm - Hiển thị sản phẩm theo danh mục */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+      <div className="grid grid-cols-2  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 m-4">
         {filteredProducts.map((product) => (
           <Link key={product.id} to={`/product/${product.id}`}>
             <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col h-full transform transition duration-300 hover:shadow-2xl hover:scale-105">
