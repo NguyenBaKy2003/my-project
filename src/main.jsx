@@ -16,10 +16,12 @@ import ThietBiPhunVaXit from "./pages/ThietBiPhunVaXit.jsx";
 
 import ThietBiNongNghiep from "./pages/ThietBiNongNghiep.jsx";
 
-import NewsPage from "./pages/NewPage.jsx";
+import NewsPage from "./pages/NewsPage.jsx";
 import OrderSuccess from "./pages/OrderSuccess.jsx";
 import NewsDetail from "./pages/NewsDetail.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
+import OrdersPage from "./pages/OrdersPage.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -42,6 +44,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="aboutus" element={<AboutUs></AboutUs>}></Route>
 
           <Route path="order-success" element={<OrderSuccess />} />
+
+          <Route path="auth" element={<AuthPage></AuthPage>}></Route>
+
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

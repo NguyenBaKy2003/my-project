@@ -1,126 +1,167 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FaFacebookF, FaTwitter, FaEnvelope } from "react-icons/fa";
-
-const products = [
-  {
-    id: 1,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "THIẾT BỊ TƯỚI PHUN MƯA",
-    name: "Bộ Phun Sương 4m Takagi GCA12",
-    description: "Bộ phun sương cao cấp Takagi GCA12 với độ bền cao.",
-    newPrice: 1254000,
-    oldPrice: 1500000,
-    brand: "Takagi",
-    sku: "GCA12",
-  },
-  {
-    id: 2,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "VAN ĐIỆN TỪ",
-    name: "Van điện từ 24VAC ren trong 1”",
-    description: "Van điện từ 24VAC cho hệ thống tưới tự động.",
-    newPrice: 980000,
-    brand: "Rain Bird",
-    sku: "24VAC-1IN",
-  },
-  {
-    id: 3,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "VAN ĐIỆN TỪ",
-    name: "Van điện từ 9V / 9V 1/2” Male solenoid valve",
-    description: "Van điện từ 9V phù hợp cho hệ thống nhỏ giọt.",
-    newPrice: 398000,
-    brand: "Hunter",
-    sku: "9V-1/2M",
-  },
-  {
-    id: 4,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "PHỤ KIỆN KẾT NỐI",
-    name: "Vòng bảo vệ đầu béc tưới Claber",
-    newPrice: 7500000,
-    brand: "Hunter",
-    sku: "9V-1/2M",
-    description: "Van điện từ 9V phù hợp cho hệ thống nhỏ giọt.",
-  },
-  {
-    id: 5,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "PHỤ KIỆN KẾT NỐI",
-    name: "Co Claber 1” (26 – 34 mm) ren ngoài",
-    newPrice: 1400000,
-    brand: "Hunter",
-    sku: "9V-1/2M",
-    description: "Van điện từ 9V phù hợp cho hệ thống nhỏ giọt.",
-  },
-  {
-    id: 6,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/90815-510x510-1.jpg",
-    category: "PHỤ KIỆN KẾT NỐI",
-    name: "Khớp nối Claber 1” ren trong",
-    newPrice: 1000000,
-    brand: "Hunter",
-    sku: "9V-1/2M",
-    description: "Van điện từ 9V phù hợp cho hệ thống nhỏ giọt.",
-  },
-];
+import { FaFacebookF, FaTwitter, FaEnvelope, FaStar } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ProductDetail() {
   const { id } = useParams();
-  const product = products.find((p) => p.id === parseInt(id));
+  const [product, setProduct] = useState(null);
+  const [images, setImages] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [activeTab, setActiveTab] = useState("description");
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existingProduct = storedCart.find((item) => item.id === product?.id);
-    if (existingProduct) {
-      setQuantity(existingProduct.quantity);
-    }
-  }, [product]);
+    async function fetchSessionId() {
+      try {
+        const response = await fetch("http://localhost:8080/api/cart/session", {
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Không thể lấy session ID!");
+        const data = await response.json();
 
-  if (!product) {
+        // Lưu sessionId vào localStorage
+        localStorage.setItem("sessionId", data.sessionId);
+      } catch (error) {
+        console.error("Lỗi khi lấy session ID:", error);
+      }
+    }
+
+    fetchSessionId();
+  }, []);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/products/${id}`,
+          {
+            credentials: "include",
+          }
+        );
+        if (!response.ok) throw new Error("Không thể tải sản phẩm!");
+        const data = await response.json();
+        setProduct(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+
+    async function fetchImages() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/product-images/product/${id}`,
+          { credentials: "include" }
+        );
+        if (!response.ok) throw new Error("Không thể tải hình ảnh sản phẩm!");
+        const data = await response.json();
+        setImages(data);
+        setSelectedImage(
+          data.find((img) => img.primary)?.url ||
+            data[0]?.url ||
+            "https://via.placeholder.com/300"
+        );
+      } catch (error) {
+        console.error("Lỗi khi tải ảnh sản phẩm:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function fetchReviews() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/reviews/${id}`,
+          {
+            credentials: "include",
+          }
+        );
+        if (!response.ok) throw new Error("Không thể tải đánh giá!");
+        const data = await response.json();
+        setReviews(data);
+      } catch (error) {
+        console.error("Lỗi khi tải đánh giá:", error);
+      }
+    }
+
+    fetchProduct();
+    fetchImages();
+    fetchReviews();
+  }, [id]);
+
+  if (loading)
+    return <div className="text-center text-blue-500">Đang tải...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (!product)
     return (
       <div className="text-center text-red-500">Sản phẩm không tồn tại!</div>
     );
-  }
 
-  const handleIncrease = () => setQuantity(quantity + 1);
-  const handleDecrease = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
+  const handleIncrease = () => setQuantity((prev) => prev + 1);
+  const handleDecrease = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const handleAddToCart = () => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existingIndex = cart.findIndex((item) => item.id === product.id);
+  const handleAddToCart = async () => {
+    const userId = localStorage.getItem("userId");
+    const sessionId = localStorage.getItem("sessionId");
 
-    if (existingIndex !== -1) {
-      cart[existingIndex].quantity = quantity;
-    } else {
-      cart.push({ ...product, quantity });
+    const cartUrl = userId
+      ? `http://localhost:8080/api/cart/add?userId=${userId}&productId=${product.id}&quantity=${quantity}`
+      : `http://localhost:8080/api/cart/add?sessionId=${sessionId}&productId=${product.id}&quantity=${quantity}`;
+
+    try {
+      const response = await fetch(cartUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (!response.ok)
+        throw new Error("Không thể thêm sản phẩm vào giỏ hàng!");
+
+      toast.success("Sản phẩm đã được thêm vào giỏ hàng!");
+
+      // 🔥 Phát sự kiện cập nhật giỏ hàng
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
     }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert("Sản phẩm đã được thêm vào giỏ hàng!");
   };
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* Ảnh sản phẩm */}
-        <div className="relative w-full md:w-full">
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Hình ảnh sản phẩm */}
+        <div className="w-5/6 mx-auto lg:w-3/4">
           <img
-            src={product.image}
+            src={selectedImage}
             alt={product.name}
-            className="w-full md:w-full  object-cover rounded-lg"
+            className="w-full object-cover rounded-lg shadow-md"
           />
+          {/* Danh sách hình ảnh nhỏ */}
+          <div className="flex mt-3 gap-2">
+            {images.map((img) => (
+              <img
+                key={img.id}
+                src={img.url}
+                alt={img.altText || "Hình ảnh sản phẩm"}
+                className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
+                  selectedImage === img.url
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                }`}
+                onClick={() => setSelectedImage(img.url)}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Chi tiết sản phẩm */}
+        {/* Thông tin sản phẩm */}
         <div className="space-y-4">
           <h1 className="text-2xl font-bold text-gray-800">{product.name}</h1>
           <div className="flex items-center space-x-3">
@@ -130,12 +171,12 @@ function ProductDetail() {
               </span>
             )}
             <span className="text-red-600 font-bold text-xl">
-              {product.newPrice.toLocaleString()} đ
+              {product.price.toLocaleString()} đ
             </span>
           </div>
           <p className="text-gray-600">{product.description}</p>
 
-          {/* Số lượng + Nút thêm vào giỏ hàng */}
+          {/* Điều chỉnh số lượng */}
           <div className="flex items-center space-x-4">
             <button
               onClick={handleDecrease}
@@ -146,7 +187,9 @@ function ProductDetail() {
               type="number"
               min="1"
               value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              onChange={(e) =>
+                setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+              }
               className="w-16 text-xl border rounded text-center"
             />
             <button
@@ -161,20 +204,20 @@ function ProductDetail() {
             Thêm vào giỏ hàng
           </button>
 
-          {/* Thông tin sản phẩm */}
+          {/* Thông tin bổ sung */}
           <ul className="text-gray-600 space-y-2 text-sm">
             <li>
               <strong>Mã sản phẩm:</strong> {product.sku}
             </li>
             <li>
-              <strong>Danh mục:</strong> {product.category}
+              <strong>Danh mục:</strong> {product.category.name}
             </li>
             <li>
-              <strong>Thương hiệu:</strong> {product.brand}
+              <strong>Thương hiệu:</strong> {product.brand || "N/A"}
             </li>
           </ul>
 
-          {/* Icon chia sẻ */}
+          {/* Chia sẻ */}
           <div className="flex space-x-4 text-gray-500">
             <FaFacebookF className="cursor-pointer hover:text-blue-600" />
             <FaTwitter className="cursor-pointer hover:text-blue-400" />
@@ -183,17 +226,29 @@ function ProductDetail() {
         </div>
       </div>
 
-      {/* Tabs Mô tả & Đánh giá */}
+      {/* Tabs */}
       <div className="mt-8 border-t pt-6">
         <div className="flex space-x-6 border-b">
-          <button className="pb-2 border-b-2 border-blue-500 text-blue-500 font-semibold">
-            Mô Tả
-          </button>
-          <button className="pb-2 text-gray-600 hover:text-blue-500">
-            Đánh Giá (0)
-          </button>
+          {["description", "reviews"].map((tab) => (
+            <button
+              key={tab}
+              className={`pb-2 ${
+                activeTab === tab
+                  ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
+                  : "text-gray-600 hover:text-blue-500"
+              }`}
+              onClick={() => setActiveTab(tab)}>
+              {tab === "description" ? "Mô Tả" : `Đánh Giá (${reviews.length})`}
+            </button>
+          ))}
         </div>
-        <div className="mt-4 text-gray-700">{product.description}</div>
+
+        {/* Nội dung tab */}
+        <div className="mt-4 text-gray-700">
+          {activeTab === "description"
+            ? product.description
+            : "Chưa có đánh giá nào."}
+        </div>
       </div>
     </div>
   );

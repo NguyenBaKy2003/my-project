@@ -1,78 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const products = [
-  {
-    id: 1,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "THIẾT BỊ TƯỚI PHUN MƯA",
-    name: "Bộ Phun Sương 4m Takagi GCA12",
-    oldPrice: "1.500.000 đ",
-    newPrice: "1.254.000 đ",
-    discount: "Giảm giá!",
-  },
-  {
-    id: 2,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "VAN ĐIỆN TỪ",
-    name: "Van điện từ 24VAC ren trong 1”",
-    newPrice: "980.000 đ",
-  },
-  {
-    id: 3,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "VAN ĐIỆN TỪ",
-    name: "Van điện từ 9V / 9V 1/2” Male solenoid valve",
-    newPrice: "398.000 đ",
-  },
-  {
-    id: 4,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "PHỤ KIỆN KẾT NỐI",
-    name: "Vòng bảo vệ đầu béc tưới Claber",
-    newPrice: "75.000 đ",
-  },
-  {
-    id: 5,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/cuon-coil-van-dien-tu-280x280.png",
-    category: "PHỤ KIỆN KẾT NỐI",
-    name: "Co Claber 1” (26 – 34 mm) ren ngoài",
-    newPrice: "140.000 đ",
-  },
-  {
-    id: 6,
-    image:
-      "https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/08/90815-510x510-1.jpg",
-    category: "PHỤ KIỆN KẾT NỐI",
-    name: "Khớp nối Claber 1” ren trong",
-    newPrice: "100.000 đ",
-  },
-];
-
-const categories = [
-  "TẤT CẢ",
-  "THIẾT BỊ TƯỚI PHUN MƯA",
-  "VAN ĐIỆN TỪ",
-  "PHỤ KIỆN KẾT NỐI",
-];
-
 function ProductCard() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState(["TẤT CẢ"]);
   const [selectedCategory, setSelectedCategory] = useState("TẤT CẢ");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("http://localhost:8080/api/categories");
+        if (!response.ok) {
+          throw new Error("Lỗi khi tải danh mục");
+        }
+        const categoryList = await response.json();
+
+        // Lọc danh mục con (chỉ lấy danh mục có parentCategory)
+        const filteredCategories = categoryList
+          .filter((category) => category.parentCategory !== null)
+          .map((category) => category.name);
+
+        setCategories(["TẤT CẢ", ...filteredCategories]);
+      } catch (error) {
+        console.error("Lỗi khi tải danh mục:", error);
+      }
+    }
+
+    async function fetchProducts() {
+      try {
+        const response = await fetch("http://localhost:8080/api/products");
+        if (!response.ok) {
+          throw new Error("Lỗi khi tải sản phẩm");
+        }
+        const productList = await response.json();
+
+        // Gán ảnh chính vào sản phẩm (nếu có)
+        const updatedProducts = productList.map((product) => ({
+          ...product,
+          image: product.primaryImage?.url || "https://via.placeholder.com/150",
+        }));
+
+        setProducts(updatedProducts);
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCategories();
+    fetchProducts();
+  }, []);
 
   // Lọc sản phẩm theo danh mục được chọn
   const filteredProducts =
     selectedCategory === "TẤT CẢ"
       ? products
-      : products.filter((product) => product.category === selectedCategory);
+      : products.filter(
+          (product) => product.category.name === selectedCategory
+        );
 
   return (
-    <div className="container mx-auto  py-10">
-      {/* Tabs - Điều chỉnh cuộn ngang trên mobile */}
+    <div className="container mx-auto py-10">
+      {/* Tabs danh mục */}
       <div className="flex flex-wrap justify-center gap-2 max-w-full overflow-hidden">
         {categories.map((category) => (
           <button
@@ -88,32 +79,29 @@ function ProductCard() {
         ))}
       </div>
 
-      {/* Grid sản phẩm - Hiển thị sản phẩm theo danh mục */}
-      <div className="grid grid-cols-2  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 m-4">
-        {filteredProducts.map((product) => (
-          <Link key={product.id} to={`/product/${product.id}`}>
-            <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col h-full transform transition duration-300 hover:shadow-2xl hover:scale-105">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-60 object-cover rounded-md"
-              />
-              <h3 className="text-sm text-gray-600 mt-2">{product.category}</h3>
-              <h2 className="font-bold flex-grow">{product.name}</h2>
-              <p className="text-blue-500 font-bold">{product.newPrice}</p>
+      {/* Hiển thị sản phẩm */}
+      {loading ? (
+        <p className="text-center mt-4">Đang tải sản phẩm...</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 m-4">
+          {filteredProducts.map((product) => (
+           <div key={product.id} className="bg-white shadow-lg rounded-lg p-4 flex flex-col h-full transform transition duration-300 hover:shadow-2xl hover:scale-105">
+             <Link to={`/product/${product.id}`} className="block">
+               <img src={product.image} alt={product.name} className="w-full h-60 object-cover rounded-md" />
+               <h3 className="text-sm text-gray-600 mt-2">{product.category.name}</h3>
+               <h2 className="font-bold flex-grow">{product.name}</h2>
+               <p className="text-blue-500 font-bold">{product.price} đ</p>
+             </Link>
 
-              {/* Nút "Thêm vào giỏ hàng" và "Xem chi tiết" luôn thẳng hàng */}
-              <div className="mt-auto">
-                <Link
-                  to={`/product/${product.id}`}
-                  className="block text-center mt-2 bg-blue-500 text-white px-3 py-2 rounded-md w-full transition duration-300 hover:bg-blue-700 hover:shadow-md">
-                  Xem chi tiết
-                </Link>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+             {/* Chỉ giữ lại một nút bấm không dùng <Link> nữa */}
+             <Link to={`/product/${product.id}`}  className="block text-center mt-2 bg-blue-500 text-white px-3 py-2 rounded-md w-full transition duration-300 hover:bg-blue-700 hover:shadow-md">
+               Xem chi tiết
+             </Link>
+           </div>
+
+          ))}
+        </div>
+      )}
 
       {/* Nút xem thêm */}
       <div className="flex justify-center mt-6">

@@ -6,13 +6,15 @@ import Home from "./pages/Home.jsx";
 function App() {
   const location = useLocation();
   return (
-    <div className="">
-      <Header></Header>
-      <main>
-        <Outlet></Outlet>
-        {location.pathname === "/" && <Home></Home>}
+    <div className="flex flex-col ">
+      <Header />
+      <main className="flex-grow py-8 min-h-screen">
+        {" "}
+        {/* Thêm khoảng cách */}
+        <Outlet />
+        {location.pathname === "/" && <Home />}
       </main>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 }
