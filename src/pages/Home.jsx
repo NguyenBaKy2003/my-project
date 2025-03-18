@@ -1,34 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import ProductCard from "../components/ProductCard";
+import ProductCardSortedByRating from "../components/product/ProductCardSortedByRating";
+import ProductByTradeMark from "../components/product/ProductByTradeMark";
 
 function Home() {
-  const [categories, setCategories] = useState([]);
-
   useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const response = await fetch("http://localhost:8080/api/categories");
-        if (!response.ok) {
-          throw new Error("Lỗi khi tải danh mục");
-        }
-        const categoryList = await response.json();
-
-        // Lọc chỉ danh mục cha (parentCategory === null)
-        const parentCategories = categoryList.filter(
-          (category) => category.parentCategory === null
-        );
-
-        setCategories(parentCategories);
-      } catch (error) {
-        console.error("Lỗi khi tải danh mục:", error);
-      }
-    }
-
-    fetchCategories();
+    AOS.init({ duration: 1000, once: true }); // Khởi tạo AOS với hiệu ứng 1s, chỉ chạy 1 lần
+    document.documentElement.style.scrollBehavior = "smooth"; // Kích hoạt cuộn mượt
   }, []);
 
   const images = [
@@ -49,7 +33,10 @@ function Home() {
 
   return (
     <>
-      <div className="container mx-auto flex flex-col items-center mt-4">
+      {/* Banner chính */}
+      <div
+        className="container mx-auto flex flex-col items-center md:w-4/5 mt-3"
+        data-aos="fade-up">
         <img
           src="https://dienmaylongnhat.vn/wp-content/uploads/2018/10/anh-top.jpg"
           alt="Banner chính"
@@ -57,7 +44,10 @@ function Home() {
         />
       </div>
 
-      <div className="container mx-auto my-4 relative z-0">
+      {/* Slider ảnh */}
+      <div
+        className="container mx-auto my-4 md:w-4/5 relative z-0"
+        data-aos="fade-up">
         <Slider {...settings}>
           {images.map((src, index) => (
             <div key={index}>
@@ -71,28 +61,18 @@ function Home() {
         </Slider>
       </div>
 
-      {/* Danh mục sản phẩm */}
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold text-center mb-6">
-          Danh Mục Sản Phẩm
-        </h1>
-        <div className="grid grid-cols-2 md:grid-cols-3 justify-center  lg:grid-cols-4 gap-4">
-          {categories.length > 0 ? (
-            categories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/category/${category.id}`}
-                className="p-4 bg-gray-100 text-center rounded hover:bg-gray-200">
-                {category.name}
-              </Link>
-            ))
-          ) : (
-            <p className="text-center col-span-4">Đang tải danh mục...</p>
-          )}
-        </div>
-      </div>
+      {/* Danh sách sản phẩm */}
+      {/* <div data-aos="fade-up">
+        <ProductCard />
+      </div> */}
 
-      <ProductCard />
+      {/* Sản phẩm theo rating */}
+      <div data-aos="fade-up" className="mt-10">
+        <ProductCardSortedByRating />
+      </div>
+      <div className="mt-5" data-aos="fade-up">
+        <ProductByTradeMark />
+      </div>
     </>
   );
 }

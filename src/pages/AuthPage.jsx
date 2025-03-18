@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,9 +22,9 @@ export default function AuthPage() {
     if (token) navigate("/");
   }, [navigate]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = useCallback((e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,7 +74,6 @@ export default function AuthPage() {
         throw new Error(result.message || "Có lỗi xảy ra!");
       }
     } catch (error) {
-      console.error("Lỗi:", error);
       toast.error(
         error.message || (isLogin ? "Đăng nhập thất bại!" : "Đăng ký thất bại!")
       );
@@ -84,7 +83,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="bg-white p-8 rounded-2xl shadow-md w-96">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
           {isLogin ? "Đăng nhập" : "Đăng ký"}
         </h2>
@@ -136,7 +135,7 @@ export default function AuthPage() {
           )}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">
+            className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-300">
             {isLogin ? "Đăng nhập" : "Đăng ký"}
           </button>
         </form>
@@ -155,13 +154,13 @@ export default function AuthPage() {
 
 const Input = ({ label, type = "text", name, value, onChange }) => (
   <div className="mb-4">
-    <label className="block text-gray-700">{label}</label>
+    <label className="block text-gray-700 font-medium">{label}</label>
     <input
       type={type}
       name={name}
       value={value}
       onChange={onChange}
-      className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
       placeholder={`Nhập ${label.toLowerCase()}`}
     />
   </div>

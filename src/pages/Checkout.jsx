@@ -106,7 +106,7 @@ function Checkout() {
           onClose: () => navigate("/order-success", {
             state: { orderNumber: response.data.orderNumber }
           }),
-          autoClose: 3000,
+          autoClose: 1000,
         });
       }
     } catch (error) {

@@ -581,8 +581,10 @@ function Header() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50">
-              SẢN PHẨM ▼
+              className="block pr-4 pl-3 duration-200 border-b 
+              uppercase
+              border-gray-100 hover:bg-gray-50">
+              Danh Mục ▼
             </button>
             {dropdownOpen && (
               <div className="absolute left-0 mt-2 w-[600px] bg-white shadow-lg rounded-lg z-50 p-4 grid grid-cols-3 gap-4">
@@ -590,6 +592,15 @@ function Header() {
               </div>
             )}
           </div>
+          <NavLink
+            to="/products"
+            className={({ isActive }) =>
+              `block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50 ${
+                isActive ? "text-orange-700" : "text-gray-700"
+              } lg:hover:bg-transparent lg:border-0 hover:text-orange-700`
+            }>
+            SẢN PHẨM
+          </NavLink>
 
           <NavLink
             to="/news"

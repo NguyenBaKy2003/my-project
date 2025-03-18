@@ -75,7 +75,7 @@ function ProductDetail() {
     async function fetchReviews() {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/reviews/${id}`,
+          `http://localhost:8080/api/reviews/product/${id}`,
           {
             credentials: "include",
           }
@@ -133,7 +133,7 @@ function ProductDetail() {
   };
 
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
+    <div className="container md:w-3/4  mx-auto px-4 lg:px-8 py-8">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Hình ảnh sản phẩm */}
@@ -174,7 +174,6 @@ function ProductDetail() {
               {product.price.toLocaleString()} đ
             </span>
           </div>
-          <p className="text-gray-600">{product.description}</p>
 
           {/* Điều chỉnh số lượng */}
           <div className="flex items-center space-x-4">
@@ -213,7 +212,7 @@ function ProductDetail() {
               <strong>Danh mục:</strong> {product.category.name}
             </li>
             <li>
-              <strong>Thương hiệu:</strong> {product.brand || "N/A"}
+              <strong>Thương hiệu:</strong> {product.tradeMark || "N/A"}
             </li>
           </ul>
 
@@ -227,7 +226,7 @@ function ProductDetail() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-8 border-t pt-6">
+      <div className="mt-8  border-t pt-6">
         <div className="flex space-x-6 border-b">
           {["description", "reviews"].map((tab) => (
             <button
@@ -245,9 +244,66 @@ function ProductDetail() {
 
         {/* Nội dung tab */}
         <div className="mt-4 text-gray-700">
-          {activeTab === "description"
-            ? product.description
-            : "Chưa có đánh giá nào."}
+          {activeTab === "description" ? (
+            product.description ? (
+              <div
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            ) : (
+              <p className="text-gray-600">Chưa có mô tả cho sản phẩm này.</p>
+            )
+          ) : activeTab === "reviews" ? (
+            reviews.length > 0 ? (
+              <div className="space-y-4 md:w-3/4  mx-auto">
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="border p-4 rounded-lg shadow-sm bg-white">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-gray-800">
+                          {review.user.firstName} {review.user.lastName}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {review.user.email}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded ${
+                          review.verifiedPurchase
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}>
+                        {review.verifiedPurchase
+                          ? "Đã mua hàng"
+                          : "Chưa mua hàng"}
+                      </span>
+                    </div>
+                    <div className="flex items-center my-2">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar
+                          key={i}
+                          className={`${
+                            i < review.rating
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-700">{review.comment}</p>
+                    <p className="text-sm text-gray-400">
+                      Đánh giá vào{" "}
+                      {new Date(review.reviewDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600">Chưa có đánh giá nào.</p>
+            )
+          ) : null}
         </div>
       </div>
     </div>
