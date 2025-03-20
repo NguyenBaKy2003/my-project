@@ -35,7 +35,10 @@ function Checkout() {
       }
     }
 
-    fetchCartData(storedUserId ? parseInt(storedUserId) : null, storedSessionId);
+    fetchCartData(
+      storedUserId ? parseInt(storedUserId) : null,
+      storedSessionId
+    );
   }, []);
 
   const fetchCartData = async (userIdInt, sessionIdStr) => {
@@ -100,17 +103,35 @@ function Checkout() {
       }
 
       const response = await axios.post(url, shippingDetail);
+      console.log("Response từ server:", response);
 
       if (response.status === 201) {
-        toast.success("Đặt hàng thành công! Cảm ơn bạn.", {
-          onClose: () => navigate("/order-success", {
-            state: { orderNumber: response.data.orderNumber }
-          }),
-          autoClose: 1000,
-        });
+        toast.success("Đặt hàng thành công! Cảm ơn bạn.");
+
+        setTimeout(() => {
+          navigate("/order-success", {
+            state: { orderNumber: response.data.orderNumber },
+          });
+        }, 1500);
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
+      }
+      if (response.status === 201) {
+        toast.success("Đặt hàng thành công! Cảm ơn bạn.");
+
+        // 🔥 Phát sự kiện cập nhật giỏ hàng
+        window.dispatchEvent(new Event("cartUpdated"));
+
+        setTimeout(() => {
+          navigate("/order-success", {
+            state: { orderNumber: response.data.orderNumber },
+          });
+        }, 1500);
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
       }
     } catch (error) {
-      console.error("Lỗi khi đặt hàng:", error);
+      console.error("Lỗi khi đặt hàng:", error.response?.data || error.message);
       toast.error("Đặt hàng thất bại! Vui lòng thử lại.");
     }
   };
@@ -140,7 +161,10 @@ function Checkout() {
               className="flex justify-between items-center border-b py-3">
               <div className="flex items-center gap-4">
                 <img
-                  src={item.product.primaryImage?.url || "https://via.placeholder.com/150"}
+                  src={
+                    item.product.primaryImage?.url ||
+                    "https://via.placeholder.com/150"
+                  }
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded-md"
                 />
@@ -159,30 +183,72 @@ function Checkout() {
 
           <div className="text-right mt-4">
             <h3 className="text-xl font-bold">
-              Tổng tiền: <span className="text-red-500">{totalAmount.toLocaleString()} đ</span>
+              Tổng tiền:{" "}
+              <span className="text-red-500">
+                {totalAmount.toLocaleString()} đ
+              </span>
             </h3>
           </div>
 
           <div className="mt-6 bg-gray-100 p-6 rounded-md">
             <h3 className="text-lg font-bold mb-4">Thông tin giao hàng</h3>
-            <input type="text" name="name" placeholder="Họ và tên" value={form.name} onChange={handleChange} className="w-full px-4 py-2 mb-3 border rounded-md" />
+            <input
+              type="text"
+              name="name"
+              placeholder="Họ và tên"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mb-3 border rounded-md"
+            />
 
-            <input type="text" name="phone" placeholder="Số điện thoại" value={form.phone} onChange={handleChange} className="w-full px-4 py-2 mb-3 border rounded-md" />
-            <input type="text" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="w-full px-4 py-2 mb-3 border rounded-md" />
-            <input type="text" name="address" placeholder="Địa chỉ giao hàng" value={form.address} onChange={handleChange} className="w-full px-4 py-2 mb-3 border rounded-md" />
-            <textarea name="note" placeholder="Ghi chú (nếu có)" value={form.note} onChange={handleChange} className="w-full px-4 py-2 mb-3 border rounded-md" />
+            <input
+              type="text"
+              name="phone"
+              placeholder="Số điện thoại"
+              value={form.phone}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mb-3 border rounded-md"
+            />
+            <input
+              type="text"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mb-3 border rounded-md"
+            />
+            <input
+              type="text"
+              name="address"
+              placeholder="Địa chỉ giao hàng"
+              value={form.address}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mb-3 border rounded-md"
+            />
+            <textarea
+              name="note"
+              placeholder="Ghi chú (nếu có)"
+              value={form.note}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mb-3 border rounded-md"
+            />
           </div>
 
-          <button onClick={handleOrder} className="mt-6 bg-green-500 text-white px-6 py-3 rounded-lg w-full hover:bg-green-600 transition">
+          <button
+            onClick={handleOrder}
+            className="mt-6 bg-green-500 text-white px-6 py-3 rounded-lg w-full hover:bg-green-600 transition">
             ✅ Xác nhận đặt hàng
           </button>
 
           {!userId && (
             <p className="mt-4 text-center text-gray-500">
               Bạn đang mua hàng với tư cách khách.
-              <button onClick={() => navigate("/auth")} className="text-blue-500 ml-1 font-semibold hover:underline">
+              <button
+                onClick={() => navigate("/auth")}
+                className="text-blue-500 ml-1 font-semibold hover:underline">
                 Đăng nhập
-              </button> để lưu thông tin đơn hàng.
+              </button>{" "}
+              để lưu thông tin đơn hàng.
             </p>
           )}
         </div>
