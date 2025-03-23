@@ -310,7 +310,12 @@ function Header() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    console.log("Search submitted:", searchQuery);
     if (searchQuery.trim()) {
+      console.log(
+        "Navigating to:",
+        `/search?q=${encodeURIComponent(searchQuery)}`
+      );
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
       setSearchFocused(false);
     }

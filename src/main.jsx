@@ -3,7 +3,7 @@ import React from "react";
 import App from "./App.jsx";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
+import SearchResults from "./pages/SearchResults";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import Cart from "./pages/Cart.jsx";
 import Checkout from "./pages/Checkout.jsx";
@@ -42,6 +42,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="/orders/:id" element={<OrderDetail />} />
 
           <Route path="wishlist" element={<WishList></WishList>}></Route>
+
+          <Route path="/search" element={<SearchResults />} />
         </Route>
       </Routes>
     </BrowserRouter>
