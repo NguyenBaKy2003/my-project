@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.0.9",
     "aos": "^2.3.4",
     "axios": "^1.8.2",
+    "lucide-react": "^0.483.0",
     "prop-types": "^15.8.1",
     "rc-slider": "^11.1.8",
     "react": "^19.0.0",

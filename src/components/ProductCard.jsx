@@ -1,148 +1,128 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-function ProductCard() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState(["TẤT CẢ"]);
-  const [selectedCategory, setSelectedCategory] = useState("TẤT CẢ");
-  const [loading, setLoading] = useState(true);
+function ProductCard({ product }) {
+  // const [isFavorite, setIsFavorite] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const response = await fetch("http://localhost:8080/api/categories");
-        if (!response.ok) throw new Error("Lỗi khi tải danh mục");
+  // Hàm tính trung bình rating
+  const calculateAverageRating = (reviews) => {
+    if (!reviews || reviews.length === 0) return 0;
+    const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+    return total / reviews.length;
+  };
 
-        const categoryList = await response.json();
+  // Lấy averageRating từ dữ liệu sản phẩm hoặc tính lại
+  const averageRating =
+    product.averageRating ?? calculateAverageRating(product.reviews);
 
-        // Chỉ lấy danh mục con (có parentCategory)
-        const filteredCategories = categoryList
-          .filter((category) => category.parentCategory !== null)
-          .map((category) => category.name);
+  // const handleAddToWishlist = async () => {
+  //   if (isLoading) return;
 
-        setCategories(["TẤT CẢ", ...filteredCategories]);
-      } catch (error) {
-        console.error("Lỗi khi tải danh mục:", error);
-      }
-    }
+  //   const userId = localStorage.getItem("userId");
+  //   if (!userId) {
+  //     alert("Vui lòng đăng nhập để thêm sản phẩm vào danh sách yêu thích");
+  //     return;
+  //   }
 
-    async function fetchProducts() {
-      try {
-        const response = await fetch("http://localhost:8080/api/products");
-        if (!response.ok) throw new Error("Lỗi khi tải sản phẩm");
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8080/api/wishlists/${userId}/products/${product.id}`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
 
-        const productList = await response.json();
-
-        // Tính toán rating trung bình
-        const updatedProducts = productList.map((product) => {
-          const averageRating =
-            product.reviews.length > 0
-              ? product.reviews.reduce(
-                  (sum, review) => sum + review.rating,
-                  0
-                ) / product.reviews.length
-              : 0;
-
-          return {
-            ...product,
-            image:
-              product.primaryImage?.url || "https://via.placeholder.com/150",
-            averageRating,
-          };
-        });
-
-        // Sắp xếp theo rating giảm dần và lấy top 20
-        updatedProducts.sort((a, b) => b.averageRating - a.averageRating);
-        setProducts(updatedProducts.slice(0, 8));
-      } catch (error) {
-        console.error("Lỗi khi tải sản phẩm:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCategories();
-    fetchProducts();
-  }, []);
-
-  // Lọc sản phẩm theo danh mục được chọn
-  const filteredProducts =
-    selectedCategory === "TẤT CẢ"
-      ? products
-      : products.filter(
-          (product) => product.category.name === selectedCategory
-        );
+  //     if (response.ok) {
+  //       setIsFavorite(true);
+  //     } else {
+  //       console.error("Failed to add to wishlist");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error adding to wishlist:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      {/* Tabs danh mục */}
-      <div className="flex flex-wrap justify-center gap-3 mb-6">
-        {categories.map((category) => (
-          <button
-            key={category}
-            className={`px-5 py-2 rounded-full text-sm font-semibold shadow-md transition-all 
-              ${
-                selectedCategory === category
-                  ? "bg-blue-600 text-white shadow-lg scale-105"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            onClick={() => setSelectedCategory(category)}>
-            {category}
-          </button>
-        ))}
-      </div>
-
-      {/* Hiển thị sản phẩm */}
-      {loading ? (
-        <p className="text-center text-gray-500">Đang tải sản phẩm...</p>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white shadow-lg rounded-xl p-4 flex flex-col h-full transform transition duration-300 
-                         hover:shadow-2xl hover:scale-105">
-              <Link to={`/product/${product.id}`} className="block">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-60 object-cover rounded-lg"
-                />
-                <h3 className="text-sm text-gray-500 mt-2">
-                  {product.category.name}
-                </h3>
-                <h2 className="font-bold flex-grow">{product.name}</h2>
-
-                {/* Hiển thị rating trung bình */}
-                <p className="text-yellow-500 font-bold">
-                  ⭐ {product.averageRating.toFixed(1)} / 5
-                </p>
-
-                {/* Giá sản phẩm */}
-                <p className="text-blue-600 font-bold text-xl mt-1">
-                  {product.price.toLocaleString()} đ
-                </p>
-              </Link>
-
-              {/* Nút Xem chi tiết */}
-              <Link
-                to={`/product/${product.id}`}
-                className="block text-center mt-3 bg-blue-500 text-white px-4 py-2 rounded-lg 
-                           transition duration-300 hover:bg-blue-700 hover:shadow-md">
-                Xem chi tiết
-              </Link>
-            </div>
-          ))}
+    <div className="bg-white rounded-xl p-4 shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-100">
+      <Link to={`/product/${product.id}`} className="block">
+        {/* Hình ảnh sản phẩm */}
+        <div className="relative overflow-hidden rounded-lg mb-3 h-48 bg-gray-50 flex items-center justify-center">
+          <img
+            src={product.primaryImage?.url || "https://via.placeholder.com/150"}
+            alt={product.name}
+            className="w-full h-full object-contain transition-transform duration-300 hover:scale-110 p-2"
+          />
+          {product.isNew && (
+            <span className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+              Mới
+            </span>
+          )}
+          {product.discount > 0 && (
+            <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              -{product.discount}%
+            </span>
+          )}
         </div>
-      )}
 
-      {/* Nút XEM THÊM */}
-      <div className="flex justify-center mt-8">
-        <button
-          className="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-md transition duration-300 
-        hover:bg-blue-700 hover:shadow-lg hover:scale-105">
-          XEM THÊM
-        </button>
+        {/* Thông tin sản phẩm */}
+        <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">
+          {product.category.name}
+        </p>
+
+        <h4 className="font-semibold h-12 text-gray-800 line-clamp-2 mb-2">
+          {product.name}
+        </h4>
+
+        {/* Hiển thị đánh giá trung bình */}
+        <div className="flex items-center mb-2">
+          <span className="text-yellow-500 mr-1">⭐</span>
+          <span className="text-sm font-medium">
+            {averageRating.toFixed(1)}
+          </span>
+          <span className="text-gray-400 text-xs ml-1">
+            ({product.reviews?.length || 0} đánh giá)
+          </span>
+        </div>
+
+        {/* Giá sản phẩm */}
+        <div className="flex items-end gap-2 mb-3">
+          <p className="text-blue-600 font-bold text-lg">
+            {product.price.toLocaleString()} đ
+          </p>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <p className="text-gray-400 text-sm line-through">
+              {product.originalPrice.toLocaleString()} đ
+            </p>
+          )}
+        </div>
+      </Link>
+
+      {/* Nút hành động */}
+      <div className="flex gap-2 mt-2">
+        <Link
+          to={`/product/${product.id}`}
+          className="flex-1 text-center bg-blue-500 text-white px-3 py-2 rounded-full 
+          transition duration-300 hover:bg-blue-700 text-sm font-medium">
+          Xem chi tiết
+        </Link>
+        {/* <button
+          className={`p-2 rounded-full transition duration-300 ${
+            isFavorite
+              ? "bg-red-100 text-red-500"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
+          aria-label="Add to favorites"
+          onClick={handleAddToWishlist}
+          disabled={isLoading}>
+          {isLoading ? "..." : isFavorite ? "❤️" : "🤍"}
+        </button> */}
       </div>
     </div>
   );

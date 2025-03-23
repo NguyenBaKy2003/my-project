@@ -9,6 +9,7 @@ import {
   FaHeart,
   FaSignOutAlt,
   FaCog,
+  FaSearch,
 } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
@@ -21,16 +22,17 @@ function Header() {
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const menuRef = useRef(null);
   const dropdownRef = useRef(null);
   const mobileDropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
   const navigate = useNavigate();
 
   // Track token changes directly
   const [authToken, setAuthToken] = useState(localStorage.getItem("token"));
-  // let sessionId = localStorage.getItem("sessionId") || Date.now().toString();
-  // localStorage.setItem("sessionId", sessionId);
 
   // Get first letter of user's name for avatar
   const getUserInitial = (name) => {
@@ -114,7 +116,7 @@ function Header() {
             handleLogout();
           }
         } catch (error) {
-          console.error("Lỗi khi lấy thông tin người dùng:", error);
+          console.error("Error fetching user data:", error);
           setUser(null);
         }
       } else {
@@ -158,7 +160,7 @@ function Header() {
       window.removeEventListener("userLoggedIn", handleUserLoggedIn);
       clearInterval(checkAuthInterval);
     };
-  }, [authToken]); // Added authToken as dependency
+  }, [authToken]);
 
   // Listen for storage changes (in case user logs in from another tab)
   useEffect(() => {
@@ -187,7 +189,7 @@ function Header() {
     try {
       let response;
       if (userId && token) {
-        // Nếu có user đăng nhập, lấy giỏ hàng theo userId
+        // If user is logged in, get cart by userId
         response = await fetch(
           `http://localhost:8080/api/cart?userId=${userId}`,
           {
@@ -195,7 +197,7 @@ function Header() {
           }
         );
       } else {
-        // Nếu không có userId (khách vãng lai), lấy giỏ hàng theo sessionId
+        // If no userId (guest), get cart by sessionId
         response = await fetch(
           `http://localhost:8080/api/cart?sessionId=${sessionId}`
         );
@@ -212,7 +214,7 @@ function Header() {
         setCartCount(0);
       }
     } catch (error) {
-      console.error("Lỗi khi lấy giỏ hàng:", error);
+      console.error("Error fetching cart:", error);
       setCartCount(0);
     }
   };
@@ -261,6 +263,12 @@ function Header() {
       ) {
         setUserDropdownOpen(false);
       }
+      if (
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target)
+      ) {
+        setSearchFocused(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -297,6 +305,14 @@ function Header() {
           },
         })
       );
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchFocused(false);
     }
   };
 
@@ -358,7 +374,7 @@ function Header() {
             <div key={group.parent.id} className="mb-4">
               <Link
                 to={`/category/${group.parent.slug}`}
-                className="font-bold text-gray-700 block mb-2"
+                className="font-bold text-gray-700 block mb-2 hover:text-blue-600 transition-colors"
                 onClick={() =>
                   handleNavigate(`/category/${group.parent.slug}`)
                 }>
@@ -369,7 +385,7 @@ function Header() {
                 <NavLink
                   key={child.id}
                   to={`/category/${child.slug}`}
-                  className="block py-1 text-gray-600 hover:text-blue-500"
+                  className="block py-1 text-gray-600 hover:text-blue-500 transition-colors pl-2 border-l-2 border-gray-200"
                   onClick={() => setDropdownOpen(false)}>
                   {child.name}
                 </NavLink>
@@ -397,17 +413,17 @@ function Header() {
       <div key={group.parent.id} className="mb-2">
         <Link
           to={`/category/${group.parent.slug}`}
-          className="block py-1 font-medium hover:text-blue-500"
+          className="block py-1 font-medium hover:text-blue-500 transition-colors"
           onClick={() => handleNavigate(`/category/${group.parent.slug}`)}>
           {group.parent.name}
         </Link>
         {group.children.length > 0 && (
-          <div className="pl-4 space-y-1 mt-1">
+          <div className="pl-4 space-y-1 mt-1 border-l-2 border-gray-200">
             {group.children.map((child) => (
               <Link
                 key={child.id}
                 to={`/category/${child.slug}`}
-                className="block py-1 text-sm hover:text-blue-500"
+                className="block py-1 text-sm hover:text-blue-500 transition-colors"
                 onClick={() => handleNavigate(`/category/${child.slug}`)}>
                 {child.name}
               </Link>
@@ -419,233 +435,345 @@ function Header() {
   };
 
   return (
-    <header className="bg-white sticky top-0 shadow-md w-full z-50">
-      {/* Heading */}
-      <div className="container mx-auto flex items-center justify-between px-6 py-3">
-        <Link to="/">
-          <img
-            src="https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/09/LIVAK-CONTRUCTION-2-e1722735184415-1.png"
-            alt="Logo"
-            className="h-12 md:h-16"
-          />
-        </Link>
-        <div className="md:flex flex-1 mx-4">
-          <input
-            type="text"
-            placeholder="Tìm kiếm sản phẩm..."
-            className="w-full border rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="hidden md:flex items-center gap-4">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700">
-            <FaPhone /> Gọi Ngay
-          </button>
-          <Link to="/cart" className="relative">
-            <FaShoppingCart className="text-2xl text-blue-700" />
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-
-          <Link
-            to="/checkout"
-            className="bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600">
-            <FaShoppingCart /> Thanh Toán
-          </Link>
-
-          {isLoading ? (
-            // Show loading state
-            <div className="bg-gray-200 text-gray-500 px-4 py-2 rounded-full flex items-center gap-2">
-              <div className="animate-pulse">Đang tải...</div>
+    <header className="bg-white sticky top-0 z-50">
+      {/* Top bar - contact and utility links */}
+      <div className="bg-gray-900 text-white py-2 hidden md:block">
+        <div className="container mx-auto px-6 flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1">
+              <FaPhone className="text-sm" />
+              <span className="text-sm">123-456-7890</span>
             </div>
-          ) : !user ? (
+          </div>
+          <div className="flex items-center space-x-4 text-sm">
+            {!isLoading && !user && (
+              <Link
+                to="/auth"
+                className="hover:text-blue-300 transition-colors flex items-center gap-1">
+                <FaUser className="text-xs" />
+                <span>Đăng Nhập / Đăng Ký</span>
+              </Link>
+            )}
             <Link
-              to="/auth"
-              className="bg-green-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-green-600">
-              <FaUser />
-              Đăng Nhập
+              to="/contact"
+              className="hover:text-blue-300 transition-colors">
+              Liên Hệ
             </Link>
-          ) : (
-            <div className="relative" ref={userDropdownRef}>
-              <button
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 hover:bg-gray-100 p-1 rounded-full">
-                {/* Letter Avatar - First letter of user's name */}
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium"
-                  style={{ backgroundColor: getAvatarColor(user.name) }}>
-                  {getUserInitial(user.name)}
-                </div>
-                <span className="text-sm font-medium text-gray-700 hidden lg:inline">
-                  {user.name}
-                </span>
-              </button>
-              {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg z-50 overflow-hidden">
-                  <div className="bg-gray-50 p-4 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium"
-                        style={{ backgroundColor: getAvatarColor(user.name) }}>
-                        {getUserInitial(user.name)}
-                      </div>
-                      <div>
-                        <div className="font-medium">{user.name}</div>
-                        <div className="text-sm text-gray-500 truncate">
-                          {user.email}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Link
-                    to="/profile"
-                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setUserDropdownOpen(false)}>
-                    <FaUser className="mr-3 text-gray-600" />
-                    Thông tin tài khoản
-                  </Link>
-
-                  <Link
-                    to="/orders"
-                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setUserDropdownOpen(false)}>
-                    <FaHistory className="mr-3 text-gray-600" />
-                    Đơn hàng của tôi
-                  </Link>
-
-                  <Link
-                    to="/wishlist"
-                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setUserDropdownOpen(false)}>
-                    <FaHeart className="mr-3 text-gray-600" />
-                    Sản phẩm yêu thích
-                  </Link>
-
-                  <Link
-                    to="/account/settings"
-                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setUserDropdownOpen(false)}>
-                    <FaCog className="mr-3 text-gray-600" />
-                    Cài đặt tài khoản
-                  </Link>
-
-                  <div className="border-t border-gray-200"></div>
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-gray-100">
-                    <FaSignOutAlt className="mr-3" />
-                    Đăng xuất
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="md:hidden flex items-center">
-          <NavLink to="/cart" className="relative mx-2 cursor-pointer">
-            <FaShoppingCart className="text-2xl text-blue-700" />
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </NavLink>
-
-          <button
-            className="p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
-            onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-          </button>
+            <Link
+              to="/aboutus"
+              className="hover:text-blue-300 transition-colors">
+              Giới Thiệu
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Danh Mục  */}
-      <nav className="hidden md:block bg-white shadow">
-        <div className="container mx-auto flex items-center justify-center space-x-6 py-2 text-gray-700 font-semibold">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50
-                    ${isActive ? "text-orange-700" : "text-gray-700"}
-                    lg:hover:bg-transparent
-                    lg:border-0 hover:text-orange-700`
-            }>
-            TRANG CHỦ
-          </NavLink>
-
-          <div className="relative" ref={dropdownRef}>
+      {/* Main header */}
+      <div className="border-b shadow-sm bg-white">
+        <div className="container mx-auto flex items-center justify-between px-6 py-4">
+          <div className="flex items-center">
             <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="block pr-4 pl-3 duration-200 border-b 
-              uppercase
-              border-gray-100 hover:bg-gray-50">
-              Danh Mục ▼
+              className="p-2 mr-2 text-gray-700 md:hidden"
+              onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
             </button>
-            {dropdownOpen && (
-              <div className="absolute left-0 mt-2 w-[600px] bg-white shadow-lg rounded-lg z-50 p-4 grid grid-cols-3 gap-4">
-                {renderCategoryColumns()}
+            <Link to="/" className="flex-shrink-0">
+              <img
+                src="https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/09/LIVAK-CONTRUCTION-2-e1722735184415-1.png"
+                alt="Logo"
+                className="h-10 md:h-12"
+              />
+            </Link>
+          </div>
+
+          {/* Search bar */}
+          <div
+            className={`flex-1 mx-6 max-w-2xl relative ${
+              searchFocused ? "z-30" : ""
+            }`}
+            ref={searchInputRef}>
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                placeholder="Tìm kiếm sản phẩm..."
+                className={`w-full border ${
+                  searchFocused
+                    ? "border-blue-500 ring-2 ring-blue-200"
+                    : "border-gray-300"
+                } rounded-full px-4 py-2 pl-10 focus:outline-none transition-all duration-200`}
+              />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              {searchFocused && (
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                  →
+                </button>
+              )}
+            </form>
+            {/* {searchFocused && (
+              <div className="absolute top-full left-0 w-full mt-1 bg-white shadow-lg rounded-lg border border-gray-200 p-2 z-50">
+                <div className="text-sm text-gray-500 mb-2">Tìm kiếm gợi ý</div>
+                <div className="space-y-1">
+                  <div className="hover:bg-gray-100 p-2 rounded cursor-pointer">
+                    Sản phẩm nông nghiệp
+                  </div>
+                  <div className="hover:bg-gray-100 p-2 rounded cursor-pointer">
+                    Máy móc công trình
+                  </div>
+                  <div className="hover:bg-gray-100 p-2 rounded cursor-pointer">
+                    Phụ kiện nông nghiệp
+                  </div>
+                </div>
               </div>
+            )} */}
+          </div>
+
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link
+              to="/cart"
+              className="relative p-2  rounded-full hover:bg-gray-100 transition-colors"
+              title="Giỏ hàng">
+              <FaShoppingCart className="text-xl text-blue-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              to="/checkout"
+              className="bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition-colors">
+              <FaShoppingCart /> Thanh Toán
+            </Link>
+
+            {isLoading ? (
+              <div className="bg-gray-200 text-gray-500 px-4 py-2 rounded-full flex items-center gap-2">
+                <div className="animate-pulse">Đang tải...</div>
+              </div>
+            ) : user ? (
+              <div className="relative" ref={userDropdownRef}>
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-full transition-colors">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-medium shadow-md"
+                    style={{ backgroundColor: getAvatarColor(user.name) }}>
+                    {getUserInitial(user.name)}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 hidden lg:inline">
+                    {user.name}
+                  </span>
+                </button>
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white shadow-xl rounded-lg z-50 overflow-hidden border border-gray-100 animate-fadeIn">
+                    <div className="bg-gray-50 p-4 border-b border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium shadow-md"
+                          style={{
+                            backgroundColor: getAvatarColor(user.name),
+                          }}>
+                          {getUserInitial(user.name)}
+                        </div>
+                        <div>
+                          <div className="font-medium">{user.name}</div>
+                          <div className="text-sm text-gray-500 truncate">
+                            {user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Link
+                      to="/profile"
+                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setUserDropdownOpen(false)}>
+                      <FaUser className="mr-3 text-gray-600" />
+                      Thông tin tài khoản
+                    </Link>
+
+                    <Link
+                      to="/orders"
+                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setUserDropdownOpen(false)}>
+                      <FaHistory className="mr-3 text-gray-600" />
+                      Đơn hàng của tôi
+                    </Link>
+
+                    <Link
+                      to="/wishlist"
+                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setUserDropdownOpen(false)}>
+                      <FaHeart className="mr-3 text-gray-600" />
+                      Sản phẩm yêu thích
+                    </Link>
+
+                    <Link
+                      to="/account/settings"
+                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setUserDropdownOpen(false)}>
+                      <FaCog className="mr-3 text-gray-600" />
+                      Cài đặt tài khoản
+                    </Link>
+
+                    <div className="border-t border-gray-200"></div>
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors">
+                      <FaSignOutAlt className="mr-3" />
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/auth"
+                className="bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700 transition-colors">
+                <FaUser />
+                Đăng Nhập
+              </Link>
             )}
           </div>
-          <NavLink
-            to="/products"
-            className={({ isActive }) =>
-              `block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50 ${
-                isActive ? "text-orange-700" : "text-gray-700"
-              } lg:hover:bg-transparent lg:border-0 hover:text-orange-700`
-            }>
-            SẢN PHẨM
-          </NavLink>
 
-          <NavLink
-            to="/news"
-            className={({ isActive }) =>
-              `block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50
-                    ${isActive ? "text-orange-700" : "text-gray-700"}
-                    lg:hover:bg-transparent
-                    lg:border-0 hover:text-orange-700`
-            }>
-            TIN TỨC
-          </NavLink>
-          <NavLink
-            to="/aboutus"
-            className={({ isActive }) =>
-              `block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50
-                    ${isActive ? "text-orange-700" : "text-gray-700"}
-                    lg:hover:bg-transparent
-                    lg:border-0 hover:text-orange-700`
-            }>
-            GIỚI THIỆU
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) =>
-              `block pr-4 pl-3 duration-200 border-b border-gray-100 hover:bg-gray-50
-                    ${isActive ? "text-orange-700" : "text-gray-700"}
-                    lg:hover:bg-transparent
-                    lg:border-0 hover:text-orange-700`
-            }>
-            LIÊN HỆ
-          </NavLink>
+          {/* Mobile actions */}
+          <div className="md:hidden flex items-center">
+            <Link to="/cart" className="relative mr-1 p-2">
+              <FaShoppingCart className="text-xl text-blue-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </div>
         </div>
-      </nav>
 
-      {/* Mobile Menu */}
+        {/* Navigation menu */}
+        <nav className="hidden md:block bg-white border-t border-gray-100">
+          <div className="container mx-auto flex items-center justify-center space-x-8 py-3 text-gray-700 font-medium">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `py-1 border-b-2 ${
+                  isActive
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent hover:text-blue-600 hover:border-blue-300"
+                } transition-colors duration-200`
+              }>
+              TRANG CHỦ
+            </NavLink>
+
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className={`py-1 border-b-2 ${
+                  dropdownOpen
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent hover:text-blue-600 hover:border-blue-300"
+                } uppercase transition-colors duration-200 flex items-center gap-1`}>
+                Danh Mục
+                <span className="text-xs ml-1">▼</span>
+              </button>
+              {dropdownOpen && (
+                <div className="absolute left-0 mt-3 w-[600px] bg-white shadow-xl rounded-lg z-50 p-6 grid grid-cols-3 gap-6 border border-gray-100 animate-fadeIn">
+                  {renderCategoryColumns()}
+                </div>
+              )}
+            </div>
+
+            <NavLink
+              to="/products"
+              className={({ isActive }) =>
+                `py-1 border-b-2 ${
+                  isActive
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent hover:text-blue-600 hover:border-blue-300"
+                } transition-colors duration-200`
+              }>
+              SẢN PHẨM
+            </NavLink>
+
+            <NavLink
+              to="/news"
+              className={({ isActive }) =>
+                `py-1 border-b-2 ${
+                  isActive
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent hover:text-blue-600 hover:border-blue-300"
+                } transition-colors duration-200`
+              }>
+              TIN TỨC
+            </NavLink>
+
+            <NavLink
+              to="/aboutus"
+              className={({ isActive }) =>
+                `py-1 border-b-2 ${
+                  isActive
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent hover:text-blue-600 hover:border-blue-300"
+                } transition-colors duration-200`
+              }>
+              GIỚI THIỆU
+            </NavLink>
+
+            <NavLink
+              to="/contact"
+              className={({ isActive }) =>
+                `py-1 border-b-2 ${
+                  isActive
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent hover:text-blue-600 hover:border-blue-300"
+                } transition-colors duration-200`
+              }>
+              LIÊN HỆ
+            </NavLink>
+          </div>
+        </nav>
+      </div>
+
+      {/* Mobile Menu Sidebar */}
       <div
         ref={menuRef}
-        className={`fixed top-0 left-0 h-full bg-white shadow-lg z-40 w-64 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 w-72 transform transition-transform duration-300 ease-in-out ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         } md:hidden overflow-y-auto`}>
-        <button
-          onClick={() => setMenuOpen(false)}
-          className="absolute top-4 right-4 text-gray-700">
-          <FaTimes size={24} />
-        </button>
+        <div className="p-4 flex justify-between items-center border-b">
+          <Link to="/" onClick={() => setMenuOpen(false)}>
+            <img
+              src="https://www.thietbinongnghiep.com.vn/wp-content/uploads/2024/09/LIVAK-CONTRUCTION-2-e1722735184415-1.png"
+              alt="Logo"
+              className="h-8"
+            />
+          </Link>
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="p-2 text-gray-700 hover:bg-gray-100 rounded-full">
+            <FaTimes size={20} />
+          </button>
+        </div>
+
+        {/* Mobile search */}
+        <div className="px-4 py-3 border-b">
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Tìm kiếm sản phẩm..."
+              className="w-full border border-gray-300 rounded-full px-4 py-2 pl-10 focus:outline-none focus:border-blue-500"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </form>
+        </div>
 
         {/* User info in mobile menu */}
         <div className="px-6 py-4 border-b">
@@ -659,62 +787,73 @@ function Header() {
             </div>
           ) : user ? (
             <div>
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-4">
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium shadow-md"
                   style={{ backgroundColor: getAvatarColor(user.name) }}>
                   {getUserInitial(user.name)}
                 </div>
                 <div>
                   <p className="font-medium text-gray-800">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <p className="text-sm text-gray-500 truncate max-w-[180px]">
+                    {user.email}
+                  </p>
                 </div>
               </div>
-              <div className="mt-2 space-y-1">
-                <Link
-                  to="/profile"
-                  className="block text-sm text-gray-600 hover:text-blue-500 flex items-center gap-2 py-1"
-                  onClick={() => setMenuOpen(false)}>
-                  <FaUser className="text-gray-500" />
-                  Thông tin tài khoản
-                </Link>
-                <Link
-                  to="/orders"
-                  className="block text-sm text-gray-600 hover:text-blue-500 flex items-center gap-2 py-1"
-                  onClick={() => setMenuOpen(false)}>
-                  <FaHistory className="text-gray-500" />
-                  Đơn hàng của tôi
-                </Link>
-                <Link
-                  to="/wishlist"
-                  className="block text-sm text-gray-600 hover:text-blue-500 flex items-center gap-2 py-1"
-                  onClick={() => setMenuOpen(false)}>
-                  <FaHeart className="text-gray-500" />
-                  Sản phẩm yêu thích
-                </Link>
-                <Link
-                  to="/account/settings"
-                  className="block text-sm text-gray-600 hover:text-blue-500 flex items-center gap-2 py-1"
-                  onClick={() => setMenuOpen(false)}>
-                  <FaCog className="text-gray-500" />
-                  Cài đặt tài khoản
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block text-sm text-red-500 hover:text-red-700 flex items-center gap-2 py-1">
-                  <FaSignOutAlt />
-                  Đăng xuất
-                </button>
+              <div className="mt-3 space-y-2 divide-y divide-gray-100">
+                <div className="space-y-2 pb-2">
+                  <Link
+                    to="/profile"
+                    className="block text-sm text-gray-600 hover:text-blue-500 hover:bg-blue-50 flex items-center gap-2 py-2 px-3 rounded-lg transition-colors"
+                    onClick={() => setMenuOpen(false)}>
+                    <FaUser className="text-gray-500 w-4 h-4" />
+                    Thông tin tài khoản
+                  </Link>
+                  <Link
+                    to="/orders"
+                    className="block text-sm text-gray-600 hover:text-blue-500 hover:bg-blue-50 flex items-center gap-2 py-2 px-3 rounded-lg transition-colors"
+                    onClick={() => setMenuOpen(false)}>
+                    <FaHistory className="text-gray-500 w-4 h-4" />
+                    Đơn hàng của tôi
+                  </Link>
+                  <Link
+                    to="/wishlist"
+                    className="block text-sm text-gray-600 hover:text-blue-500 hover:bg-blue-50 flex items-center gap-2 py-2 px-3 rounded-lg transition-colors"
+                    onClick={() => setMenuOpen(false)}>
+                    <FaHeart className="text-gray-500 w-4 h-4" />
+                    Sản phẩm yêu thích
+                  </Link>
+                </div>
+                <div className="space-y-2 pt-2">
+                  <Link
+                    to="/account/settings"
+                    className="block text-sm text-gray-600 hover:text-blue-500 hover:bg-blue-50 flex items-center gap-2 py-2 px-3 rounded-lg transition-colors"
+                    onClick={() => setMenuOpen(false)}>
+                    <FaCog className="text-gray-500 w-4 h-4" />
+                    Cài đặt tài khoản
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left block text-sm text-red-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-2 py-2 px-3 rounded-lg transition-colors">
+                    <FaSignOutAlt className="w-4 h-4" />
+                    Đăng xuất
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
-            <Link
-              to="/auth"
-              className="flex items-center gap-2 text-blue-600"
-              onClick={() => setMenuOpen(false)}>
-              <FaUser />
-              <span>Đăng nhập / Đăng ký</span>
-            </Link>
+            <div className="py-2">
+              <Link
+                to="/auth"
+                className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={() => setMenuOpen(false)}>
+                <FaUser />
+                <span>Đăng nhập / Đăng ký</span>
+              </Link>
+              <div className="mt-3 text-center text-sm text-gray-500">
+                Đăng nhập để xem thông tin và quản lý đơn hàng
+              </div>
+            </div>
           )}
         </div>
 
@@ -739,13 +878,21 @@ function Header() {
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="block text-lg font-medium hover:text-blue-500 w-full text-left">
-              Sản Phẩm ▼
+              Danh Mục ▼
             </button>
             {dropdownOpen && (
               <div className="pl-4 mt-2 space-y-2">
                 {renderMobileCategories()}
               </div>
             )}
+          </li>
+          <li>
+            <Link
+              to="/products"
+              className="block text-lg font-medium hover:text-blue-500"
+              onClick={() => setMenuOpen(false)}>
+              Sản Phẩm
+            </Link>
           </li>
           <li>
             <Link
