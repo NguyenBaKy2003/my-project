@@ -326,7 +326,7 @@ function CategoriesPage() {
                     {products.length} sản phẩm
                   </p>
                 </div>
-                <div className="text-sm text-gray-500">
+                {/* <div className="text-sm text-gray-500">
                   <span className="font-medium">Sắp xếp:</span>
                   <select
                     className="ml-2 border-0 bg-gray-50 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
@@ -338,7 +338,7 @@ function CategoriesPage() {
                     <option value="price-asc">Giá thấp đến cao</option>
                     <option value="price-desc">Giá cao đến thấp</option>
                   </select>
-                </div>
+                </div> */}
               </div>
             </div>
 
