@@ -12,7 +12,8 @@ import {
   FaSearch,
 } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-
+import { FaFacebookMessenger } from "react-icons/fa"; // Messenger
+import { SiZalo } from "react-icons/si"; // Zalo
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -706,7 +707,7 @@ function Header() {
               SẢN PHẨM
             </NavLink>
 
-            <NavLink
+            {/* <NavLink
               to="/news"
               className={({ isActive }) =>
                 `py-1 border-b-2 ${
@@ -716,7 +717,7 @@ function Header() {
                 } transition-colors duration-200`
               }>
               TIN TỨC
-            </NavLink>
+            </NavLink> */}
 
             <NavLink
               to="/aboutus"
@@ -871,14 +872,14 @@ function Header() {
               Trang Chủ
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/news"
               className="block text-lg font-medium hover:text-blue-500"
               onClick={() => setMenuOpen(false)}>
               Tin Tức
             </Link>
-          </li>
+          </li> */}
           <li className="relative" ref={mobileDropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}

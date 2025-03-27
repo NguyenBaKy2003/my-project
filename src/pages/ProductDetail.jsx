@@ -193,14 +193,47 @@ function ProductDetail() {
   };
 
   // Format descriptions to display with line breaks
-  const formatDescription = (text) => {
-    return text.split("\n").map((line, index) => (
-      <p key={index} className="mb-4">
-        {line}
-      </p>
-    ));
-  };
+  const formatDescription = (description) => {
+    if (!description) return null;
 
+    // Split the description into content and parse out image URLs
+    const imageRegex = /\[image:([^\]]+)\]/g;
+    const textWithoutImages = description.replace(imageRegex, "");
+    const imageUrls = [];
+    let match;
+
+    while ((match = imageRegex.exec(description)) !== null) {
+      imageUrls.push(match[1]);
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Render text paragraphs */}
+        {textWithoutImages.split("\n").map(
+          (line, index) =>
+            line.trim() && (
+              <p key={`text-${index}`} className="text-gray-700 mb-4">
+                {line}
+              </p>
+            )
+        )}
+
+        {/* Render images if any */}
+        {imageUrls.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {imageUrls.map((url, index) => (
+              <img
+                key={`desc-img-${index}`}
+                src={url}
+                alt={`Mô tả sản phẩm ${index + 1}`}
+                className="w-full h-auto object-cover rounded-lg shadow-md"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -398,10 +431,6 @@ function ProductDetail() {
                     {product.tradeMark || "N/A"}
                   </a>
                 </div>
-                <div>
-                  <span className="text-gray-600">Xuất xứ:</span>
-                </div>
-                <div>{product.origin || "N/A"}</div>
               </div>
             </div>
 
@@ -455,9 +484,6 @@ function ProductDetail() {
                     <div
                       key={desc.id || index}
                       className="bg-white p-4 rounded-lg">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                        Mô tả {index + 1}
-                      </h3>
                       <div className="text-gray-700">
                         {formatDescription(desc.content)}
                       </div>
@@ -521,9 +547,6 @@ function ProductDetail() {
                     {calculateAverageRating()} / 5
                   </p>
                 </div>
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-medium">
-                  Viết đánh giá
-                </button>
               </div>
 
               {reviews.length > 0 ? (
@@ -591,9 +614,6 @@ function ProductDetail() {
               ) : (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                   <p className="mb-2">Chưa có đánh giá nào cho sản phẩm này.</p>
-                  <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-medium mt-2">
-                    Hãy là người đầu tiên đánh giá
-                  </button>
                 </div>
               )}
             </div>

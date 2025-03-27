@@ -13,6 +13,7 @@ export default function AuthPage() {
     password: "",
     confirmPassword: "",
   });
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
 
@@ -21,15 +22,89 @@ export default function AuthPage() {
     if (token) navigate("/");
   }, [navigate]);
 
-  const handleChange = useCallback((e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }, []);
+  // Validation functions
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
+
+  const validatePhoneNumber = (phoneNumber) => {
+    const phoneRegex = /^(0|\+84)[3-9][0-9]{8}$/;
+    return phoneRegex.test(phoneNumber);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Email validation
+    if (!formData.email) {
+      newErrors.email = "Email không được để trống";
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Địa chỉ email không hợp lệ";
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Mật khẩu không được để trống";
+    } else if (!validatePassword(formData.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    }
+
+    // Registration-specific validations
+    if (!isLogin) {
+      // First name validation
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = "Tên không được để trống";
+      }
+
+      // Last name validation
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = "Họ không được để trống";
+      }
+
+      // Phone number validation
+      if (!formData.phoneNumber) {
+        newErrors.phoneNumber = "Số điện thoại không được để trống";
+      } else if (!validatePhoneNumber(formData.phoneNumber)) {
+        newErrors.phoneNumber = "Số điện thoại không hợp lệ";
+      }
+
+      // Confirm password validation
+      if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+
+      // Clear specific field error when user starts typing
+      if (errors[name]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp!");
+    // Validate form before submission
+    if (!validateForm()) {
       return;
     }
 
@@ -141,6 +216,7 @@ export default function AuthPage() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
+                error={errors.lastName}
                 icon={
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -162,6 +238,7 @@ export default function AuthPage() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
+                error={errors.firstName}
                 icon={
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -187,6 +264,7 @@ export default function AuthPage() {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
+              error={errors.phoneNumber}
               icon={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -211,6 +289,7 @@ export default function AuthPage() {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            error={errors.email}
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -234,6 +313,7 @@ export default function AuthPage() {
             name="password"
             value={formData.password}
             onChange={handleChange}
+            error={errors.password}
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -258,6 +338,7 @@ export default function AuthPage() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              error={errors.confirmPassword}
               icon={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -360,8 +441,15 @@ export default function AuthPage() {
     </div>
   );
 }
-
-const Input = ({ label, type = "text", name, value, onChange, icon }) => (
+const Input = ({
+  label,
+  type = "text",
+  name,
+  value,
+  onChange,
+  icon,
+  error,
+}) => (
   <div className="relative">
     <label className="block text-gray-700 text-sm font-medium mb-1">
       {label}
@@ -377,12 +465,17 @@ const Input = ({ label, type = "text", name, value, onChange, icon }) => (
         name={name}
         value={value}
         onChange={onChange}
-        className={`block w-full ${
-          icon ? "pl-10" : "pl-3"
-        } pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`}
+        className={`block w-full ${icon ? "pl-10" : "pl-3"} pr-3 py-2 border ${
+          error ? "border-red-500" : "border-gray-300"
+        } rounded-lg focus:outline-none focus:ring-2 ${
+          error
+            ? "focus:ring-red-500 focus:border-red-500"
+            : "focus:ring-blue-500 focus:border-blue-500"
+        } transition duration-200`}
         placeholder={`Nhập ${label.toLowerCase()}`}
         required
       />
     </div>
+    {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
   </div>
 );

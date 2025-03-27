@@ -5,14 +5,17 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import ProductCard from "../components/ProductCard";
+import { MessageCircle, Send } from "lucide-react"; // More descriptive icons
+
 import ProductCardSortedByRating from "../components/product/ProductCardSortedByRating";
 import ProductByTradeMark from "../components/product/ProductByTradeMark";
+import { FaFacebookMessenger as MessengerLogo } from "react-icons/fa"; // Messenger
+import { SiZalo as ZaloLogo } from "react-icons/si"; // Zalo
 
 function Home() {
   useEffect(() => {
-    AOS.init({ duration: 1000, once: true }); // Khởi tạo AOS với hiệu ứng 1s, chỉ chạy 1 lần
-    document.documentElement.style.scrollBehavior = "smooth"; // Kích hoạt cuộn mượt
+    AOS.init({ duration: 1000, once: true });
+    document.documentElement.style.scrollBehavior = "smooth";
   }, []);
 
   const anhBanner = [
@@ -43,8 +46,36 @@ function Home() {
   };
 
   return (
-    <div className="bg-gray-50">
-      {/* Phần giới thiệu */}
+    <div className="bg-gray-50 relative">
+      {/* Social Icons - Fixed Position */}
+      <div className="fixed bottom-24 right-4 z-50 flex flex-col space-y-4">
+        <a
+          href="https://zalo.me/0395038729"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-blue-500 p-3 rounded-full shadow-lg  hover:bg-blue-600 transition group"
+          title="Zalo">
+          <ZaloLogo
+            color="white"
+            size={26}
+            className="group-hover:scale-110  transition"
+          />
+        </a>
+        <a
+          href="https://m.me/your-messenger-page"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-blue-600 p-3 rounded-full shadow-lg hover:bg-blue-700 transition group"
+          title="Messenger">
+          <MessengerLogo
+            color="white"
+            size={24}
+            className="group-hover:scale-110 transition"
+          />
+        </a>
+      </div>
+
+      {/* Giới thiệu */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-white py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col lg:flex-row items-center gap-8">
@@ -62,11 +93,6 @@ function Home() {
                   className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
                   Mua ngay
                 </Link>
-                {/* <Link
-                  to="/specials"
-                  className="px-6 py-3 border border-blue-600 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition duration-300">
-                  Xem khuyến mãi
-                </Link> */}
               </div>
             </div>
             <div className="w-full lg:w-1/2" data-aos="fade-left">
@@ -83,9 +109,6 @@ function Home() {
       {/* Slider ảnh banner */}
       <div className="py-12 bg-white">
         <div className="container mx-auto px-4 max-w-6xl" data-aos="fade-up">
-          {/* <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Chương trình khuyến mãi
-          </h2> */}
           <div className="rounded-xl overflow-hidden shadow-lg">
             <Slider {...cauHinhSlider}>
               {anhBanner.map((src, index) => (
@@ -95,14 +118,6 @@ function Home() {
                     alt={`Khuyến mãi ${index + 1}`}
                     className="w-full h-auto object-cover"
                   />
-                  {/* <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                    <h3 className="text-white text-2xl font-bold">
-                      Ưu đãi đặc biệt {index + 1}
-                    </h3>
-                    <p className="text-white text-lg">
-                      Khuyến mãi có thời hạn cho các sản phẩm đã chọn
-                    </p>
-                  </div> */}
                 </div>
               ))}
             </Slider>
@@ -115,60 +130,15 @@ function Home() {
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Sản phẩm đánh giá cao */}
           <div data-aos="fade-up" className="mb-16">
-            <div className="flex justify-between items-center mb-8">
-              {/* <h2 className="text-3xl font-bold text-gray-800">
-                Sản phẩm đánh giá cao
-              </h2>
-              <Link
-                to="/top-rated"
-                className="text-blue-600 hover:text-blue-800 font-medium">
-                Xem tất cả →
-              </Link> */}
-            </div>
             <ProductCardSortedByRating />
           </div>
 
           {/* Sản phẩm theo thương hiệu */}
           <div data-aos="fade-up">
-            {/* <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-800">
-                Mua sắm theo thương hiệu
-              </h2>
-              <Link
-                to="/brands"
-                className="text-blue-600 hover:text-blue-800 font-medium">
-                Xem tất cả thương hiệu →
-              </Link>
-            </div> */}
             <ProductByTradeMark />
           </div>
         </div>
       </div>
-
-      {/* Đăng ký nhận tin */}
-      {/* <div className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700">
-        <div
-          className="container mx-auto px-4 max-w-6xl text-center"
-          data-aos="zoom-in">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Đăng ký nhận bản tin
-          </h2>
-          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-            Đăng ký để nhận thông tin cập nhật về sản phẩm mới, ưu đãi đặc biệt
-            và giảm giá độc quyền.
-          </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center max-w-lg mx-auto">
-            <input
-              type="email"
-              placeholder="Địa chỉ email của bạn"
-              className="flex-grow px-4 py-3 rounded-lg focus:outline-none"
-            />
-            <button className="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition duration-300">
-              Đăng ký
-            </button>
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 }
