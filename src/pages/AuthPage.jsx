@@ -110,8 +110,8 @@ export default function AuthPage() {
 
     try {
       const endpoint = isLogin
-        ? "http://localhost:8080/api/users/login"
-        : "http://localhost:8080/api/users/register";
+        ? "https://45.122.253.163:8891/api/users/login"
+        : "https://45.122.253.163:8891/api/users/register";
 
       const dataToSend = isLogin
         ? { email: formData.email, password: formData.password }

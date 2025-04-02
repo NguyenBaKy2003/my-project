@@ -23,7 +23,7 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`http://localhost:8080/api/orders/user/${userId}`)
+    fetch(`https://45.122.253.163:8891/api/orders/user/${userId}`)
       .then((res) => res.json())
       .then((data) => setOrders(data))
       .catch((err) => console.error("Lỗi tải đơn hàng:", err));
@@ -43,7 +43,7 @@ export default function OrdersPage() {
   const handleSubmitReview = () => {
     if (!selectedProduct) return;
     fetch(
-      `http://localhost:8080/api/reviews/user/${userId}/product/${selectedProduct.id}`,
+      `https://45.122.253.163:8891/api/reviews/user/${userId}/product/${selectedProduct.id}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

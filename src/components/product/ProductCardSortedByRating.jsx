@@ -10,7 +10,9 @@ function ProductCardSortedByRating() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await fetch("http://localhost:8080/api/products");
+        const response = await fetch(
+          "https://45.122.253.163:8891/api/products"
+        );
         if (!response.ok) throw new Error("Lỗi khi tải sản phẩm");
 
         const productList = await response.json();

@@ -25,7 +25,7 @@ function SearchResults() {
 
       try {
         setIsLoading(true);
-        const response = await axios.get(`http://localhost:8080/api/products`);
+        const response = await axios.get(`https://localhost:8080/api/products`);
 
         // Filter products based on name matching
         const matchedProducts = response.data.filter((product) =>

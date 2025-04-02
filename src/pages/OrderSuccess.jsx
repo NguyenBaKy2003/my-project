@@ -18,7 +18,7 @@ function OrderSuccess() {
   const fetchOrder = async (orderId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/orders/number/${orderId}`
+        `https://45.122.253.163:8891/api/orders/number/${orderId}`
       );
       setOrder(response.data);
     } catch (error) {

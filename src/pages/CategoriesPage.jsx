@@ -18,7 +18,9 @@ function CategoriesPage() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const response = await fetch("http://localhost:8080/api/categories");
+        const response = await fetch(
+          "https://45.122.253.163:8891/api/categories"
+        );
         if (!response.ok) throw new Error("Lỗi khi tải danh mục");
         const categoryList = await response.json();
         setCategories(categoryList);
@@ -42,7 +44,7 @@ function CategoriesPage() {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:8080/api/products?category=${categoryId}`
+          `https://45.122.253.163:8891/api/products?category=${categoryId}`
         );
 
         if (!response.ok) throw new Error("Lỗi khi tải sản phẩm");

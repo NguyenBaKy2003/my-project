@@ -21,7 +21,7 @@ function Cart() {
   const fetchCart = async () => {
     setLoading(true);
     try {
-      let url = `http://localhost:8080/api/cart?${
+      let url = `https://45.122.253.163:8891/api/cart?${
         userID ? `userId=${userID}` : `sessionId=${sessionId}`
       }`;
       const response = await fetch(url, { credentials: "include" });
@@ -54,7 +54,7 @@ function Cart() {
       )
     );
     try {
-      let url = `http://localhost:8080/api/cart/items/${id}?quantity=${newQuantity}&${
+      let url = `https://45.122.253.163:8891/api/cart/items/${id}?quantity=${newQuantity}&${
         userID ? `userId=${userID}` : `sessionId=${sessionId}`
       }`;
       const response = await fetch(url, {
@@ -75,7 +75,7 @@ function Cart() {
   const removeFromCart = async (id) => {
     setCart(cart.filter((item) => item.id !== id));
     try {
-      let url = `http://localhost:8080/api/cart/items/${id}?${
+      let url = `https://45.122.253.163:8891/api/cart/items/${id}?${
         userID ? `userId=${userID}` : `sessionId=${sessionId}`
       }`;
       const response = await fetch(url, {

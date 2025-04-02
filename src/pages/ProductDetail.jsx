@@ -26,9 +26,12 @@ function ProductDetail() {
   useEffect(() => {
     async function fetchSessionId() {
       try {
-        const response = await fetch("http://localhost:8080/api/cart/session", {
-          credentials: "include",
-        });
+        const response = await fetch(
+          "https://45.122.253.163:8891/api/cart/session",
+          {
+            credentials: "include",
+          }
+        );
         if (!response.ok) throw new Error("Không thể lấy session ID!");
         const data = await response.json();
 
@@ -46,7 +49,7 @@ function ProductDetail() {
     async function fetchProduct() {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/products/${id}`,
+          `https://45.122.253.163:8891/api/products/${id}`,
           {
             credentials: "include",
           }
@@ -63,7 +66,7 @@ function ProductDetail() {
     async function fetchImages() {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/product-images/product/${id}`,
+          `https://45.122.253.163:8891/api/product-images/product/${id}`,
           { credentials: "include" }
         );
         if (!response.ok) throw new Error("Không thể tải hình ảnh sản phẩm!");
@@ -84,7 +87,7 @@ function ProductDetail() {
     async function fetchReviews() {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/reviews/product/${id}`,
+          `https://45.122.253.163:8891/api/reviews/product/${id}`,
           {
             credentials: "include",
           }
@@ -127,8 +130,8 @@ function ProductDetail() {
     const sessionId = localStorage.getItem("sessionId");
 
     const cartUrl = userId
-      ? `http://localhost:8080/api/cart/add?userId=${userId}&productId=${product.id}&quantity=${quantity}`
-      : `http://localhost:8080/api/cart/add?sessionId=${sessionId}&productId=${product.id}&quantity=${quantity}`;
+      ? `https://45.122.253.163:8891/api/cart/add?userId=${userId}&productId=${product.id}&quantity=${quantity}`
+      : `https://45.122.253.163:8891/api/cart/add?sessionId=${sessionId}&productId=${product.id}&quantity=${quantity}`;
 
     try {
       const response = await fetch(cartUrl, {
@@ -160,7 +163,7 @@ function ProductDetail() {
       }
 
       const response = await fetch(
-        `http://localhost:8080/api/wishlists/${userId}/products/${product.id}`,
+        `https://45.122.253.163:8891/api/wishlists/${userId}/products/${product.id}`,
         {
           method: "POST",
           headers: {

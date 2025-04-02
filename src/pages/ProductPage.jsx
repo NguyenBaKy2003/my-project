@@ -21,7 +21,9 @@ function ProductPage() {
     async function fetchProducts() {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8080/api/products");
+        const response = await fetch(
+          "https://45.122.253.163:8891/api/products"
+        );
         if (!response.ok) throw new Error("Lỗi khi tải sản phẩm");
         const productList = await response.json();
         setProducts(productList);
@@ -35,7 +37,9 @@ function ProductPage() {
 
     async function fetchCategories() {
       try {
-        const response = await fetch("http://localhost:8080/api/categories");
+        const response = await fetch(
+          "https://45.122.253.163:8891/api/categories"
+        );
         if (!response.ok) throw new Error("Lỗi khi tải danh mục");
         const categoryList = await response.json();
 

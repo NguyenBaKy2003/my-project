@@ -69,7 +69,9 @@ function Header() {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
       try {
-        const response = await fetch("http://localhost:8080/api/categories");
+        const response = await fetch(
+          "https://45.122.253.163:8891/api/categories"
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
         }
@@ -105,7 +107,7 @@ function Header() {
       if (userId && token) {
         try {
           const response = await fetch(
-            `http://localhost:8080/api/users/${userId}`,
+            `https://45.122.253.163:8891/api/users/${userId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -192,7 +194,7 @@ function Header() {
       if (userId && token) {
         // If user is logged in, get cart by userId
         response = await fetch(
-          `http://localhost:8080/api/cart?userId=${userId}`,
+          `https://45.122.253.163:8891/api/cart?userId=${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -200,7 +202,7 @@ function Header() {
       } else {
         // If no userId (guest), get cart by sessionId
         response = await fetch(
-          `http://localhost:8080/api/cart?sessionId=${sessionId}`
+          `https://45.122.253.163:8891/api/cart?sessionId=${sessionId}`
         );
       }
 

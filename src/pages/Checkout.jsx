@@ -45,7 +45,7 @@ function Checkout() {
   const fetchCartData = async (userIdInt, sessionIdStr) => {
     try {
       setIsLoading(true);
-      let url = "http://localhost:8080/api/cart";
+      let url = "https://45.122.253.163:8891/api/cart";
 
       if (userIdInt) {
         url += `?userId=${userIdInt}`;
@@ -109,7 +109,7 @@ function Checkout() {
     };
 
     try {
-      let url = "http://localhost:8080/api/orders/checkout";
+      let url = "https://45.122.253.163:8891/api/orders/checkout";
 
       if (userId) {
         url += `?userId=${userId}`;

@@ -42,7 +42,7 @@ const WishList = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:8080/api/wishlists/${userId}`
+        `https://45.122.253.163:8891/api/wishlists/${userId}`
       );
       setWishlist(response.data);
     } catch (err) {
@@ -56,7 +56,7 @@ const WishList = () => {
   const fetchCartCount = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/cart/${userId}`
+        `https://45.122.253.163:8891/api/cart/${userId}`
       );
       setCartCount(response.data.count); // Giả sử API trả về { count: 5 }
     } catch (err) {
@@ -74,7 +74,7 @@ const WishList = () => {
     setRemovingItems([...removingItems, productId]);
     try {
       const response = await axios.delete(
-        `http://localhost:8080/api/wishlists/${userId}/products/${productId}`
+        `https://45.122.253.163:8891/api/wishlists/${userId}/products/${productId}`
       );
       setWishlist(response.data);
       toast.success("✅ Sản phẩm đã được xóa khỏi danh sách yêu thích!");
@@ -97,7 +97,7 @@ const WishList = () => {
 
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:8080/api/wishlists/${userId}`);
+      await axios.delete(`https://45.122.253.163:8891/api/wishlists/${userId}`);
       setWishlist({ products: [] });
       toast.success("🗑️ Đã xóa tất cả sản phẩm yêu thích!");
     } catch (err) {
@@ -115,7 +115,7 @@ const WishList = () => {
       formData.append("productId", productId);
       formData.append("quantity", quantity);
 
-      await axios.post("http://localhost:8080/api/cart/add", formData, {
+      await axios.post("https://45.122.253.163:8891/api/cart/add", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
